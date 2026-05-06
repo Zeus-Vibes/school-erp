@@ -1,0 +1,98 @@
+export const results = [
+  {
+    studentId: 'S001', studentName: 'Aarav Patel', class: '10A',
+    subjects: [
+      { name: 'Mathematics', maxMarks: 100, obtained: 92, grade: 'A+' },
+      { name: 'Science', maxMarks: 100, obtained: 88, grade: 'A' },
+      { name: 'English', maxMarks: 100, obtained: 85, grade: 'A' },
+      { name: 'Hindi', maxMarks: 100, obtained: 78, grade: 'B+' },
+      { name: 'Soc. Studies', maxMarks: 100, obtained: 90, grade: 'A+' },
+      { name: 'Computer', maxMarks: 100, obtained: 95, grade: 'A+' },
+    ],
+    totalMarks: 600, obtained: 528, percentage: 88, rank: 2, result: 'Pass',
+  },
+  {
+    studentId: 'S002', studentName: 'Sneha Iyer', class: '10A',
+    subjects: [
+      { name: 'Mathematics', maxMarks: 100, obtained: 95, grade: 'A+' },
+      { name: 'Science', maxMarks: 100, obtained: 91, grade: 'A+' },
+      { name: 'English', maxMarks: 100, obtained: 93, grade: 'A+' },
+      { name: 'Hindi', maxMarks: 100, obtained: 89, grade: 'A' },
+      { name: 'Soc. Studies', maxMarks: 100, obtained: 87, grade: 'A' },
+      { name: 'Computer', maxMarks: 100, obtained: 96, grade: 'A+' },
+    ],
+    totalMarks: 600, obtained: 551, percentage: 91.8, rank: 1, result: 'Pass',
+  },
+  {
+    studentId: 'S003', studentName: 'Rohit Gupta', class: '10B',
+    subjects: [
+      { name: 'Mathematics', maxMarks: 100, obtained: 72, grade: 'B+' },
+      { name: 'Science', maxMarks: 100, obtained: 68, grade: 'B' },
+      { name: 'English', maxMarks: 100, obtained: 75, grade: 'B+' },
+      { name: 'Hindi', maxMarks: 100, obtained: 80, grade: 'A' },
+      { name: 'Soc. Studies', maxMarks: 100, obtained: 65, grade: 'B' },
+      { name: 'Computer', maxMarks: 100, obtained: 78, grade: 'B+' },
+    ],
+    totalMarks: 600, obtained: 438, percentage: 73, rank: 5, result: 'Pass',
+  },
+  {
+    studentId: 'S004', studentName: 'Ananya Singh', class: '9A',
+    subjects: [
+      { name: 'Mathematics', maxMarks: 100, obtained: 88, grade: 'A' },
+      { name: 'Science', maxMarks: 100, obtained: 92, grade: 'A+' },
+      { name: 'English', maxMarks: 100, obtained: 90, grade: 'A+' },
+      { name: 'Hindi', maxMarks: 100, obtained: 85, grade: 'A' },
+      { name: 'Soc. Studies', maxMarks: 100, obtained: 82, grade: 'A' },
+      { name: 'Computer', maxMarks: 100, obtained: 91, grade: 'A+' },
+    ],
+    totalMarks: 600, obtained: 528, percentage: 88, rank: 1, result: 'Pass',
+  },
+  {
+    studentId: 'S005', studentName: 'Dev Chauhan', class: '9B',
+    subjects: [
+      { name: 'Mathematics', maxMarks: 100, obtained: 55, grade: 'C' },
+      { name: 'Science', maxMarks: 100, obtained: 62, grade: 'B' },
+      { name: 'English', maxMarks: 100, obtained: 58, grade: 'C' },
+      { name: 'Hindi', maxMarks: 100, obtained: 70, grade: 'B+' },
+      { name: 'Soc. Studies', maxMarks: 100, obtained: 60, grade: 'B' },
+      { name: 'Computer', maxMarks: 100, obtained: 65, grade: 'B' },
+    ],
+    totalMarks: 600, obtained: 370, percentage: 61.7, rank: 8, result: 'Pass',
+  },
+  {
+    studentId: 'S011', studentName: 'Vivek Agarwal', class: '10A',
+    subjects: [
+      { name: 'Mathematics', maxMarks: 100, obtained: 82, grade: 'A' },
+      { name: 'Science', maxMarks: 100, obtained: 79, grade: 'B+' },
+      { name: 'English', maxMarks: 100, obtained: 88, grade: 'A' },
+      { name: 'Hindi', maxMarks: 100, obtained: 74, grade: 'B+' },
+      { name: 'Soc. Studies', maxMarks: 100, obtained: 81, grade: 'A' },
+      { name: 'Computer', maxMarks: 100, obtained: 86, grade: 'A' },
+    ],
+    totalMarks: 600, obtained: 490, percentage: 81.7, rank: 3, result: 'Pass',
+  },
+  {
+    studentId: 'S012', studentName: 'Riya Desai', class: '10B',
+    subjects: [
+      { name: 'Mathematics', maxMarks: 100, obtained: 90, grade: 'A+' },
+      { name: 'Science', maxMarks: 100, obtained: 85, grade: 'A' },
+      { name: 'English', maxMarks: 100, obtained: 92, grade: 'A+' },
+      { name: 'Hindi', maxMarks: 100, obtained: 88, grade: 'A' },
+      { name: 'Soc. Studies', maxMarks: 100, obtained: 84, grade: 'A' },
+      { name: 'Computer', maxMarks: 100, obtained: 93, grade: 'A+' },
+    ],
+    totalMarks: 600, obtained: 532, percentage: 88.7, rank: 1, result: 'Pass',
+  },
+  {
+    studentId: 'S013', studentName: 'Harsh Pandya', class: '9A',
+    subjects: [
+      { name: 'Mathematics', maxMarks: 100, obtained: 76, grade: 'B+' },
+      { name: 'Science', maxMarks: 100, obtained: 80, grade: 'A' },
+      { name: 'English', maxMarks: 100, obtained: 72, grade: 'B+' },
+      { name: 'Hindi', maxMarks: 100, obtained: 68, grade: 'B' },
+      { name: 'Soc. Studies', maxMarks: 100, obtained: 74, grade: 'B+' },
+      { name: 'Computer', maxMarks: 100, obtained: 82, grade: 'A' },
+    ],
+    totalMarks: 600, obtained: 452, percentage: 75.3, rank: 3, result: 'Pass',
+  },
+]

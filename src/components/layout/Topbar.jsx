@@ -1,0 +1,132 @@
+import { useState, useRef, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Menu, Search, Bell, LogOut, User, Shield } from 'lucide-react'
+import { useAuth } from '../../context/AuthContext'
+import Avatar from '../ui/Avatar'
+import Badge from '../ui/Badge'
+import toast from 'react-hot-toast'
+
+const notifications = [
+  { id: 1, text: 'Sneha Iyer fee is due', time: '2h ago', unread: true },
+  { id: 2, text: 'New notice: Sports Day', time: '5h ago', unread: true },
+  { id: 3, text: 'Rohit Gupta attendance below 75%', time: 'Yesterday', unread: false },
+  { id: 4, text: 'Parent-Teacher Meeting — 10th May', time: '2 days ago', unread: false },
+]
+
+const Topbar = ({ onMenuClick, pageTitle }) => {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [showProfile, setShowProfile] = useState(false)
+  const profileRef = useRef(null)
+  const notifRef = useRef(null)
+
+  const roleColor = user?.role === 'admin' ? 'red' : user?.role === 'teacher' ? 'gold' : 'green'
+  const roleLabel = user?.role === 'admin' ? 'Administrator' : user?.role === 'teacher' ? 'Teacher' : 'Student'
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) setShowProfile(false)
+      if (notifRef.current && !notifRef.current.contains(event.target)) setShowNotifications(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleLogout = () => {
+    logout()
+    toast.success('Logged out successfully')
+    navigate('/login', { replace: true })
+  }
+
+  return (
+    <div className="sticky top-0 z-30 flex h-topbar items-center justify-between border-b border-border bg-white px-6 shadow-sm">
+      <div className="flex items-center gap-4">
+        <button onClick={onMenuClick} className="rounded-lg p-1.5 text-textMuted hover:bg-gray-100 lg:hidden" aria-label="Open menu" tabIndex={0}>
+          <Menu className="h-5 w-5" />
+        </button>
+        <h1 className="text-lg font-semibold text-textPrimary font-inter">{pageTitle}</h1>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <button onClick={() => toast('Search feature coming soon!', { icon: '🔍' })} className="rounded-lg p-2 text-textMuted hover:bg-gray-100 transition-colors" aria-label="Search" tabIndex={0}>
+          <Search className="h-5 w-5" />
+        </button>
+
+        <div className="relative" ref={notifRef}>
+          <button onClick={() => { setShowNotifications(!showNotifications); setShowProfile(false) }} className="relative rounded-lg p-2 text-textMuted hover:bg-gray-100 transition-colors" aria-label="Notifications" tabIndex={0}>
+            <Bell className="h-5 w-5" />
+            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-highlight" />
+          </button>
+
+          <AnimatePresence>
+            {showNotifications && (
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
+                className="absolute right-0 top-12 w-80 rounded-2xl border border-border bg-white shadow-modal">
+                <div className="border-b border-border px-4 py-3 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-textPrimary">Notifications</h3>
+                  <span className="rounded-full bg-highlight px-2 py-0.5 text-[10px] font-medium text-white">{notifications.filter((n) => n.unread).length} new</span>
+                </div>
+                <div className="max-h-60 overflow-y-auto">
+                  {notifications.map((notif) => (
+                    <div key={notif.id} className="flex items-start gap-3 border-b border-border/50 px-4 py-3 hover:bg-bg/50 transition-colors cursor-pointer">
+                      {notif.unread && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />}
+                      <div className={notif.unread ? '' : 'ml-5'}><p className="text-sm text-textPrimary">{notif.text}</p><p className="text-xs text-textMuted">{notif.time}</p></div>
+                    </div>
+                  ))}
+                </div>
+                <div className="px-4 py-2.5"><button className="text-xs font-medium text-primary hover:underline" tabIndex={0} aria-label="View all notifications">View All</button></div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className="relative" ref={profileRef}>
+          <button onClick={() => { setShowProfile(!showProfile); setShowNotifications(false) }} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-gray-100 transition-colors" aria-label="Profile menu" tabIndex={0}>
+            <Avatar name={user?.name || 'User'} size="sm" />
+            <div className="hidden sm:block text-left">
+              <p className="text-sm font-medium text-textPrimary leading-tight">{user?.name}</p>
+              <p className="text-[10px] text-textMuted capitalize">{user?.role}</p>
+            </div>
+          </button>
+
+          <AnimatePresence>
+            {showProfile && (
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
+                className="absolute right-0 top-12 w-64 rounded-2xl border border-border bg-white shadow-modal overflow-hidden">
+                <div className="bg-primary/5 px-4 py-4 border-b border-border">
+                  <div className="flex items-center gap-3">
+                    <Avatar name={user?.name || 'User'} size="md" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-textPrimary truncate">{user?.name}</p>
+                      <p className="text-xs text-textMuted truncate">{user?.email}</p>
+                      <Badge label={roleLabel} color={roleColor} className="mt-1" />
+                    </div>
+                  </div>
+                </div>
+                <div className="py-1">
+                  <button onClick={() => { setShowProfile(false); toast('Profile settings coming soon!', { icon: '👤' }) }}
+                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-textPrimary hover:bg-gray-50 transition-colors" tabIndex={0} aria-label="My Profile">
+                    <User className="h-4 w-4 text-textMuted" />My Profile
+                  </button>
+                  <button onClick={() => { setShowProfile(false); toast('Role info coming soon!', { icon: '🛡️' }) }}
+                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-textPrimary hover:bg-gray-50 transition-colors" tabIndex={0} aria-label="Role Info">
+                    <Shield className="h-4 w-4 text-textMuted" />Role: {roleLabel}
+                  </button>
+                </div>
+                <div className="border-t border-border">
+                  <button onClick={handleLogout} className="flex w-full items-center gap-2.5 px-4 py-3 text-sm text-highlight hover:bg-red-50 transition-colors" tabIndex={0} aria-label="Logout">
+                    <LogOut className="h-4 w-4" />Logout
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default Topbar

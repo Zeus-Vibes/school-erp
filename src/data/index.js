@@ -1,0 +1,8 @@
+export { students } from './students'
+export { teachers } from './teachers'
+export { feesData } from './fees'
+export { attendanceData, workingDays } from './attendance'
+export { results } from './results'
+export { notices } from './notices'
+export { timetable, timeSlots } from './timetable'
+export { books, issuedBooks } from './library'
