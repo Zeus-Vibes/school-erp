@@ -1,76 +1,66 @@
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 
-const PDF_CARD_WIDTH_MM = 63.5
+const CARD_WIDTH_MM = 63.5
+const CARD_HEIGHT_MM = 100.0
 
-export const generateIdCardPdf = async (elementId, studentName, studentId) => {
+export const generateIdCardPdf = async (elementId, cardHolderName, cardHolderId) => {
   const element = document.getElementById(elementId)
   if (!element) return
 
   const canvas = await html2canvas(element, {
-    scale: 4,
+    scale: 3,
     useCORS: true,
     backgroundColor: '#FFFFFF',
-    logging: false,
+    logging: false
   })
 
-  const canvasWidth = canvas.width
-  const canvasHeight = canvas.height
-  const aspectRatio = canvasHeight / canvasWidth
-  const pdfWidth = PDF_CARD_WIDTH_MM
-  const pdfHeight = pdfWidth * aspectRatio
-
   const imgData = canvas.toDataURL('image/png', 1.0)
-  const doc = new jsPDF('p', 'mm', [pdfWidth, pdfHeight])
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: [CARD_WIDTH_MM, CARD_HEIGHT_MM]
+  })
 
-  doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
-  doc.save(`IDCard_${studentName.replace(/\s+/g, '_')}_${studentId}.pdf`)
+  doc.addImage(imgData, 'PNG', 0, 0, CARD_WIDTH_MM, CARD_HEIGHT_MM)
+  doc.save(`IDCard_${cardHolderName.replace(/\s+/g, '_')}_${cardHolderId}.pdf`)
 }
 
-export const generateBulkIdCards = async (studentElements, onProgress) => {
-  const doc = new jsPDF('p', 'mm', 'a4')
-  const cardWidth = PDF_CARD_WIDTH_MM
-  let cardIndex = 0
+export const generateBulkIdCards = async (elements, onProgress) => {
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: [CARD_WIDTH_MM, CARD_HEIGHT_MM]
+  })
 
-  for (let i = 0; i < studentElements.length; i++) {
-    const { elementId } = studentElements[i]
+  let pageAdded = false
+
+  for (let i = 0; i < elements.length; i++) {
+    const { elementId } = elements[i]
     const element = document.getElementById(elementId)
     if (!element) continue
 
+    if (pageAdded) {
+      doc.addPage([CARD_WIDTH_MM, CARD_HEIGHT_MM], 'portrait')
+    } else {
+      pageAdded = true
+    }
+
     const canvas = await html2canvas(element, {
-      scale: 4,
+      scale: 3,
       useCORS: true,
       backgroundColor: '#FFFFFF',
-      logging: false,
+      logging: false
     })
 
-    const aspectRatio = canvas.height / canvas.width
-    const cardHeight = cardWidth * aspectRatio
-
     const imgData = canvas.toDataURL('image/png', 1.0)
-    const cols = 3
-    const rows = Math.floor(270 / (cardHeight + 8))
-    const cardsPerPage = cols * rows
-    const marginX = (210 - cardWidth * cols - 8 * (cols - 1)) / 2
-    const marginY = 12
-    const col = cardIndex % cols
-    const row = Math.floor((cardIndex % cardsPerPage) / cols)
-
-    if (cardIndex > 0 && cardIndex % cardsPerPage === 0) {
-      doc.addPage()
-    }
-
-    const xPosition = marginX + col * (cardWidth + 8)
-    const yPosition = marginY + row * (cardHeight + 8)
-
-    doc.addImage(imgData, 'PNG', xPosition, yPosition, cardWidth, cardHeight)
-    cardIndex++
+    doc.addImage(imgData, 'PNG', 0, 0, CARD_WIDTH_MM, CARD_HEIGHT_MM)
 
     if (onProgress) {
-      onProgress(i + 1, studentElements.length)
+      onProgress(i + 1, elements.length)
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 100))
+    await new Promise((resolve) => setTimeout(resolve, 50))
   }
 
   doc.save('IDCards_Bulk.pdf')

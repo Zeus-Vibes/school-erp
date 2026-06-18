@@ -1,117 +1,159 @@
 import jsPDF from 'jspdf'
 import { formatDate, numberToWords } from './helpers'
+import { getSchoolBrand } from './schoolBrand'
 
-export const generateFeeReceipt = (feeRecord, studentData) => {
+export const generateFeeReceipt = (feeRecord, studentData, customPlanInfo = null) => {
   const doc = new jsPDF()
-  const pageWidth = doc.internal.pageSize.getWidth()
+  const pageWidth = doc.internal.pageSize.getWidth() // usually 210mm
+  const pageHeight = doc.internal.pageSize.getHeight() // usually 297mm
 
-  // Header
-  doc.setFillColor(30, 58, 95)
-  doc.rect(0, 0, pageWidth, 40, 'F')
+  const standard = studentData?.standard || '1'
+  const brand = getSchoolBrand(standard)
 
-  doc.setTextColor(255, 255, 255)
-  doc.setFontSize(20)
-  doc.setFont('helvetica', 'bold')
-  doc.text('Shree Bala International School', pageWidth / 2, 15, { align: 'center' })
-  doc.setFontSize(9)
-  doc.text('Shiv Dhara Educational Charitable Trust', pageWidth / 2, 22, { align: 'center' })
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'normal')
-  doc.text('Near Suramya Heights, Eklingji Bopal Road, Sanand - Ahmedabad', pageWidth / 2, 29, { align: 'center' })
-  doc.text('Ph: +91 84888 87896 | Email: shreebalainternationalschool@gmail.com', pageWidth / 2, 35, { align: 'center' })
+  // Receipt Number format
+  // RCP-SBIS-{year}-{4-digit-serial} or RCP-SDS-{year}-{serial}
+  const year = feeRecord.paymentDate ? feeRecord.paymentDate.split('-')[0] : new Date().getFullYear()
+  const serial = String(feeRecord.id || '0001').replace(/[^0-9]/g, '').slice(-4).padStart(4, '0')
+  const isShivDhara = standard === 'LKG' || standard === 'UKG'
+  const receiptNo = isShivDhara
+    ? `RCP-SDS-${year}-${parseInt(serial, 10)}`
+    : `RCP-SBIS-${year}-${serial}`
 
-  // Gold stripe
-  doc.setFillColor(212, 160, 23)
-  doc.rect(0, 40, pageWidth, 3, 'F')
+  const drawHalf = (yOffset, copyType) => {
+    // 1. Header Banner
+    doc.setFillColor(30, 58, 95) // Dark blue
+    doc.rect(0, yOffset, pageWidth, 28, 'F')
 
-  // Receipt title
-  doc.setTextColor(30, 58, 95)
-  doc.setFontSize(16)
-  doc.setFont('helvetica', 'bold')
-  doc.text('FEE RECEIPT', pageWidth / 2, 55, { align: 'center' })
-
-  // Receipt meta
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'normal')
-  doc.setTextColor(44, 44, 44)
-  doc.text(`Receipt No: ${feeRecord.receiptNo || 'N/A'}`, 20, 68)
-  doc.text(`Date: ${formatDate(feeRecord.paymentDate)}`, pageWidth - 20, 68, { align: 'right' })
-
-  // Student details box
-  doc.setDrawColor(229, 231, 235)
-  doc.setLineWidth(0.5)
-  doc.roundedRect(15, 75, pageWidth - 30, 45, 3, 3)
-
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(11)
-  doc.text('Student Details', 20, 85)
-
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(10)
-  const studentInfo = [
-    ['Student Name:', feeRecord.studentName],
-    ['Class:', feeRecord.class],
-    ['Student ID:', feeRecord.studentId],
-    ['Father\'s Name:', studentData?.fatherName || '—'],
-  ]
-
-  studentInfo.forEach(([label, value], index) => {
-    const yPosition = 95 + index * 6
+    // Header Texts
+    doc.setTextColor(255, 255, 255)
+    doc.setFontSize(16)
     doc.setFont('helvetica', 'bold')
-    doc.text(label, 22, yPosition)
+    doc.text(brand.name, pageWidth / 2, yOffset + 8, { align: 'center' })
+
+    doc.setFontSize(8)
     doc.setFont('helvetica', 'normal')
-    doc.text(String(value), 65, yPosition)
-  })
+    doc.text('Shiv Dhara Educational Charitable Trust', pageWidth / 2, yOffset + 13, { align: 'center' })
+    doc.text('Near Suramya Heights, Eklingji Bopal Road, Sanand - Ahmedabad', pageWidth / 2, yOffset + 18, { align: 'center' })
+    doc.text('Ph: +91 84888 87896 | Email: shreebalainternationalschool@gmail.com', pageWidth / 2, yOffset + 23, { align: 'center' })
 
-  // Fee details box
-  doc.roundedRect(15, 128, pageWidth - 30, 40, 3, 3)
+    // Copy Type indicator
+    doc.setFillColor(212, 160, 23) // Gold stripe
+    doc.rect(0, yOffset + 28, pageWidth, 2, 'F')
 
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(11)
-  doc.text('Fee Details', 20, 138)
-
-  doc.setFontSize(10)
-  const feeInfo = [
-    ['Term:', feeRecord.term],
-    ['Amount:', `Rs. ${feeRecord.amount.toLocaleString('en-IN')}`],
-    ['Payment Method:', feeRecord.method || '—'],
-    ['Amount in Words:', numberToWords(feeRecord.amount)],
-  ]
-
-  feeInfo.forEach(([label, value], index) => {
-    const yPosition = 148 + index * 6
+    doc.setTextColor(30, 58, 95)
+    doc.setFontSize(10)
     doc.setFont('helvetica', 'bold')
-    doc.text(label, 22, yPosition)
+    doc.text(copyType.toUpperCase(), pageWidth - 15, yOffset + 36, { align: 'right' })
+
+    // Title
+    doc.setFontSize(12)
+    doc.text('FEE RECEIPT', 15, yOffset + 36)
+
+    // Meta details
+    doc.setFontSize(9)
     doc.setFont('helvetica', 'normal')
-    doc.text(String(value), 65, yPosition)
-  })
+    doc.setTextColor(44, 44, 44)
+    doc.text(`Receipt No: ${receiptNo}`, 15, yOffset + 43)
+    doc.text(`Date: ${formatDate(feeRecord.paymentDate || new Date().toISOString().split('T')[0])}`, pageWidth - 15, yOffset + 43, { align: 'right' })
 
-  // Status
-  doc.setFillColor(220, 252, 231)
-  doc.roundedRect(15, 178, pageWidth - 30, 15, 3, 3, 'F')
-  doc.setTextColor(21, 128, 61)
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(12)
-  doc.text('STATUS: PAID', pageWidth / 2, 188, { align: 'center' })
+    // Divider
+    doc.setDrawColor(229, 231, 235)
+    doc.setLineWidth(0.3)
+    doc.line(15, yOffset + 46, pageWidth - 15, yOffset + 46)
 
-  // Signature section
+    // Student & Fee Information Grid
+    doc.setFont('helvetica', 'bold')
+    doc.text('Student Details', 15, yOffset + 52)
+
+    doc.setFont('helvetica', 'normal')
+    doc.text('Student Name:', 15, yOffset + 58)
+    doc.text(feeRecord.studentName || studentData?.name || '—', 45, yOffset + 58)
+
+    doc.text('GR Number:', 15, yOffset + 64)
+    doc.text(studentData?.grNumber || '—', 45, yOffset + 64)
+
+    doc.text('Class:', 15, yOffset + 70)
+    doc.text(feeRecord.class || (studentData ? `${studentData.standard}-${studentData.division}` : '—'), 45, yOffset + 70)
+
+    // Fee info
+    doc.setFont('helvetica', 'bold')
+    doc.text('Payment Details', 110, yOffset + 52)
+
+    doc.setFont('helvetica', 'normal')
+    doc.text('Fee Type:', 110, yOffset + 58)
+    doc.text(feeRecord.term || 'Tuition Fee', 140, yOffset + 58)
+
+    doc.text('Amount:', 110, yOffset + 64)
+    doc.text(`Rs. ${(feeRecord.amount || 0).toLocaleString('en-IN')}`, 140, yOffset + 64)
+
+    doc.text('Payment Mode:', 110, yOffset + 70)
+    doc.text(feeRecord.method || 'Cash', 140, yOffset + 70)
+
+    // Amount in Words
+    doc.setFontSize(8.5)
+    doc.text(`Amount in Words: ${numberToWords(feeRecord.amount || 0)}`, 15, yOffset + 78)
+
+    // Divider
+    doc.line(15, yOffset + 81, pageWidth - 15, yOffset + 81)
+
+    // Custom Plan installment details (Parent Copy Only)
+    if (copyType === 'Parent Copy' && customPlanInfo) {
+      doc.setFillColor(239, 246, 255) // Light blue box
+      doc.roundedRect(15, yOffset + 84, pageWidth - 30, 16, 2, 2, 'F')
+      doc.setTextColor(30, 58, 95)
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(8.5)
+      doc.text('CUSTOM INSTALLMENT PLAN ACTIVE', 20, yOffset + 89)
+
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(8)
+      doc.text(`Installment: ${customPlanInfo.installmentNo} of ${customPlanInfo.totalInstallments}`, 20, yOffset + 95)
+      doc.text(`Remaining Balance: Rs. ${(customPlanInfo.remainingBalance || 0).toLocaleString('en-IN')}`, 75, yOffset + 95)
+      if (customPlanInfo.nextDueDate) {
+        doc.text(`Next Due: ${formatDate(customPlanInfo.nextDueDate)}`, 140, yOffset + 95)
+      }
+      doc.setTextColor(44, 44, 44)
+    }
+
+    // Stamp circle & signature
+    const bottomBase = yOffset + (copyType === 'Parent Copy' && customPlanInfo ? 108 : 95)
+
+    // Stamp area
+    doc.setDrawColor(30, 58, 95)
+    doc.roundedRect(15, bottomBase, 32, 16, 2, 2)
+    doc.setFontSize(7)
+    doc.setFont('helvetica', 'bold')
+    doc.text('SCHOOL STAMP', 31, bottomBase + 9, { align: 'center' })
+
+    // Signatures
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8.5)
+    doc.text('Received By: __________________', 80, bottomBase + 10)
+
+    doc.line(pageWidth - 55, bottomBase + 10, pageWidth - 15, bottomBase + 10)
+    doc.text('Authorized Signatory', pageWidth - 35, bottomBase + 14, { align: 'center' })
+  }
+
+  // Draw Top Half - School Copy
+  drawHalf(0, 'School Copy')
+
+  // Draw Dashed Scissors Line at 148.5mm
+  doc.setDrawColor(156, 163, 175)
+  doc.setLineWidth(0.4)
+  doc.setLineDashPattern([2, 2], 0)
+  doc.line(0, 148.5, pageWidth, 148.5)
+
+  // Cut Label
   doc.setTextColor(107, 114, 128)
-  doc.setFontSize(9)
-  doc.setFont('helvetica', 'normal')
-  doc.text('This is a computer-generated receipt and does not require a signature.', pageWidth / 2, 210, { align: 'center' })
-
-  doc.setDrawColor(30, 58, 95)
-  doc.line(pageWidth - 70, 225, pageWidth - 20, 225)
-  doc.setTextColor(44, 44, 44)
-  doc.setFontSize(10)
-  doc.text('Authorized Signatory', pageWidth - 45, 232, { align: 'center' })
-
-  // Footer
-  doc.setFillColor(30, 58, 95)
-  doc.rect(0, 275, pageWidth, 22, 'F')
-  doc.setTextColor(255, 255, 255)
   doc.setFontSize(8)
-  doc.text('Shree Bala International School | CBSE Affiliated | Shiv Dhara Educational Charitable Trust', pageWidth / 2, 287, { align: 'center' })
+  doc.setFont('helvetica', 'bold')
+  doc.text('── [✂ Cut Here dashed line at 148.5mm] ──', pageWidth / 2, 148.5 + 1, { align: 'center' })
 
-  doc.save(`FeeReceipt_${feeRecord.studentName.replace(/\s+/g, '_')}_${feeRecord.term.replace(/\s+/g, '_')}.pdf`)
+  // Reset Line Dash for Bottom Half
+  doc.setLineDashPattern([], 0)
+
+  // Draw Bottom Half - Parent Copy
+  drawHalf(148.5, 'Parent Copy')
+
+  doc.save(`FeeReceipt_${(studentData?.name || 'Student').replace(/\s+/g, '_')}_${(feeRecord.term || 'Fee').replace(/\s+/g, '_')}.pdf`)
 }
