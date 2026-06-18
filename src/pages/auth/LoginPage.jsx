@@ -66,9 +66,9 @@ const LoginPage = () => {
           <img src={logoImg} alt="Shree Bala Logo" className="mx-auto mb-6 h-20 w-20 rounded-2xl object-cover shadow-lg" />
           <h2 className="font-playfair text-3xl font-bold text-white">Shree Bala International School</h2>
           <p className="mt-1 text-xs font-medium text-white/50 tracking-wide">Shiv Dhara Educational Charitable Trust</p>
-          <p className="mt-3 text-sm text-white/70">Shaping Tomorrow&apos;s Leaders Since 1999</p>
+          <p className="mt-3 text-sm text-white/70">Shaping Tomorrow&apos;s Leaders Since 2014</p>
           <div className="mt-12 flex items-center justify-center gap-6">
-            {[{ val: '900+', label: 'Students' }, { val: '25+', label: 'Years' }, { val: '50+', label: 'Teachers' }].map(({ val, label }) => (
+            {[{ val: '1200+', label: 'Students' }, { val: '10+', label: 'Years' }, { val: '50+', label: 'Teachers' }].map(({ val, label }) => (
               <div key={label} className="text-center"><p className="text-xl font-bold text-accent">{val}</p><p className="text-xs text-white/60">{label}</p></div>
             ))}
           </div>

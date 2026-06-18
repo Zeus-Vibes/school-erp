@@ -7,9 +7,8 @@ const spring = { type: 'spring', stiffness: 200, damping: 20 }
 
 const achievements = [
   'CBSE Affiliated',
-  'ISO Certified',
   'Smart Campus',
-  '25+ Years Legacy',
+  '10+ Years Legacy',
 ]
 
 const AboutSection = () => {
@@ -34,18 +33,22 @@ const AboutSection = () => {
             </h2>
             <div className="space-y-5 text-[15px] leading-relaxed text-textMuted">
               <p>
-                Founded in 1999 under the{' '}
+                Founded in 2014 under the{' '}
                 <span className="font-medium text-textPrimary">
                   Shiv Dhara Educational Charitable Trust
                 </span>
-                , Shree Bala International School has been at the forefront
-                of quality education in Ahmedabad.
+                , our institution is dedicated to nurturing young minds in Ahmedabad. We operate through two specialized divisions:
               </p>
+              <ul className="list-disc pl-5 space-y-2 text-textPrimary">
+                <li>
+                  <span className="font-semibold">Shiv Dhara Pre-Primary School</span>, catering to LKG and UKG.
+                </li>
+                <li>
+                  <span className="font-semibold">Shree Bala International School</span>, offering 1st to 8th Standard.
+                </li>
+              </ul>
               <p>
-                Our school offers Nursery to Higher Secondary in both English
-                and Gujarati mediums, affiliated with CBSE. With
-                state-of-the-art facilities and experienced faculty, every
-                child can thrive.
+                Both divisions offer education in both English and Gujarati mediums. With state-of-the-art classrooms and dedicated faculty, we provide an environment where every child can grow.
               </p>
             </div>
 
@@ -93,7 +96,7 @@ const AboutSection = () => {
               />
             </div>
             <div className="absolute -bottom-5 -left-5 rounded-xl border border-border bg-white px-5 py-3" style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
-              <p className="font-playfair text-2xl font-semibold text-textPrimary">1999</p>
+              <p className="font-playfair text-2xl font-semibold text-textPrimary">2014</p>
               <p className="text-xs text-textMuted">Established</p>
             </div>
           </motion.div>

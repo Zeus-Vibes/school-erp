@@ -10,9 +10,8 @@ const spring = { type: 'spring', stiffness: 200, damping: 20 }
 const NAV_LINKS = [
   { label: 'Home', href: '#home' },
   { label: 'About', href: '#about' },
-  { label: 'Programs', href: '#programs' },
   { label: 'Facilities', href: '#facilities' },
-  { label: 'Notices', href: '#notices' },
+  { label: 'Programs', href: '#programs' },
   { label: 'Contact', href: '#contact' },
 ]
 

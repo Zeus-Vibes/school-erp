@@ -1,8 +1,8 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { Monitor, FlaskConical, BookOpen, Trophy, Cpu, Bus } from 'lucide-react'
+import { Monitor, Video, BookOpen, Trophy, Cpu, Bus } from 'lucide-react'
 import smartClassroomImg from '../../assets/images/smart_classroom.png'
-import scienceLabImg from '../../assets/images/science_lab.png'
+import avRoomImg from '../../assets/images/hero_events.png'
 import libraryImg from '../../assets/images/school_library.png'
 import sportsImg from '../../assets/images/sports_complex.png'
 import computerLabImg from '../../assets/images/computer_lab.png'
@@ -12,8 +12,8 @@ const spring = { type: 'spring', stiffness: 200, damping: 20 }
 
 const facilities = [
   { icon: Monitor, title: 'Smart Classrooms', desc: 'Interactive boards with projectors in every classroom', image: smartClassroomImg },
-  { icon: FlaskConical, title: 'Science Labs', desc: 'Fully equipped Physics, Chemistry & Biology labs', image: scienceLabImg },
-  { icon: BookOpen, title: 'Library', desc: '10,000+ books with digital catalogue system', image: libraryImg },
+  { icon: Video, title: 'AV Room', desc: 'Interactive audio-visual room for multimedia learning, screenings, and student presentations', image: avRoomImg },
+  { icon: BookOpen, title: 'Library', desc: 'Rich collection of children books, storybooks, and reference guides', image: libraryImg },
   { icon: Trophy, title: 'Sports Complex', desc: 'Cricket, Football, Basketball & Athletics', image: sportsImg },
   { icon: Cpu, title: 'Computer Lab', desc: '50-seat lab with latest hardware & software', image: computerLabImg },
   { icon: Bus, title: 'Transport', desc: '30+ routes covering all residential areas', image: transportImg },

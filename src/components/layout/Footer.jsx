@@ -6,7 +6,7 @@ const QUICK_LINKS = [
   { label: 'Home', href: '#home' },
   { label: 'About Us', href: '#about' },
   { label: 'Facilities', href: '#facilities' },
-  { label: 'Notices', href: '#notices' },
+  { label: 'Programs', href: '#programs' },
   { label: 'Contact', href: '#contact' },
 ]
 
@@ -39,7 +39,7 @@ const Footer = () => (
           </Link>
           <p className="text-sm leading-relaxed text-[#71717A]">
             Shaping tomorrow&apos;s leaders through excellence in education
-            since 1999.
+            since 2014.
           </p>
         </div>
 

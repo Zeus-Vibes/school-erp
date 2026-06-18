@@ -42,7 +42,7 @@ const HeroSection = () => {
 
   useEffect(() => {
     const zoomTimer = setTimeout(() => setHasZoomed(true), 200)
-    const contentTimer = setTimeout(() => setShowContent(true), 1400)
+    const contentTimer = setTimeout(() => setShowContent(true), 800)
     return () => {
       clearTimeout(zoomTimer)
       clearTimeout(contentTimer)
@@ -53,7 +53,7 @@ const HeroSection = () => {
     if (!isAutoPlaying || !showContent) return
     autoPlayTimer.current = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % slides.length)
-    }, 5000)
+    }, 3000)
     return () => clearInterval(autoPlayTimer.current)
   }, [isAutoPlaying, showContent])
 
@@ -61,7 +61,7 @@ const HeroSection = () => {
     setActiveIndex(index)
     setIsAutoPlaying(false)
     clearInterval(autoPlayTimer.current)
-    setTimeout(() => setIsAutoPlaying(true), 10000)
+    setTimeout(() => setIsAutoPlaying(true), 6000)
   }, [])
 
   const currentSlide = slides[activeIndex]
@@ -79,7 +79,7 @@ const HeroSection = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
           <motion.img
             src={currentSlide.image}
@@ -101,9 +101,8 @@ const HeroSection = () => {
           <motion.h1
             key={`hero-${activeIndex}`}
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={springDelayed(0.3)}
+            animate={{ opacity: 1, y: 0, transition: springDelayed(0.05) }}
+            exit={{ opacity: 0, y: -12, transition: { duration: 0.15 } }}
             className="font-playfair text-white leading-[0.9] select-none"
             style={{ fontSize: 'clamp(72px, 14vw, 140px)', fontWeight: 700 }}
           >
@@ -115,9 +114,8 @@ const HeroSection = () => {
           <motion.p
             key={`sub-${activeIndex}`}
             initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={springDelayed(0.5)}
+            animate={{ opacity: 1, y: 0, transition: springDelayed(0.12) }}
+            exit={{ opacity: 0, y: -8, transition: { duration: 0.15 } }}
             className="mt-5 font-inter text-white/80 tracking-wide select-none"
             style={{ fontSize: 'clamp(14px, 2vw, 22px)', fontWeight: 400 }}
           >
@@ -129,7 +127,7 @@ const HeroSection = () => {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={springDelayed(0.7)}
+            transition={springDelayed(0.2)}
             className="mt-12 flex items-center gap-4"
           >
             <Link to="/login">
@@ -167,7 +165,7 @@ const HeroSection = () => {
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={springDelayed(1)}
+            transition={springDelayed(0.3)}
             className="absolute bottom-10 inset-x-0 z-20 flex justify-center items-center gap-2.5"
           >
             {slides.map((slide, index) => {
@@ -215,7 +213,7 @@ const HeroSection = () => {
             className="h-full bg-white/60"
             initial={{ width: '0%' }}
             animate={{ width: '100%' }}
-            transition={{ duration: 5, ease: 'linear' }}
+            transition={{ duration: 3, ease: 'linear' }}
           />
         </div>
       )}
