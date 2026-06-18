@@ -46,7 +46,6 @@ const ReportCards = () => {
 
   // Helper: check if marks are fully submitted for all subjects
   const isExamUnlocked = (exam) => {
-    if (exam.status === 'Completed') return true
     return exam.subjects?.every((s) => s.marksSubmitted) || false
   }
 

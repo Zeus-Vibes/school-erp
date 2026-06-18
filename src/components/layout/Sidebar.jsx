@@ -138,15 +138,17 @@ const Sidebar = ({ isOpen, onClose }) => {
       </nav>
 
       <div className="border-t border-white/10 px-3 py-3 space-y-1">
-        <button 
-          onClick={handleSettingsClick}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white transition-all cursor-pointer text-left" 
-          tabIndex={0} 
-          aria-label="Settings"
-        >
-          <Settings className="h-5 w-5" />
-          Settings
-        </button>
+        {user?.role === 'admin' && (
+          <button 
+            onClick={handleSettingsClick}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white transition-all cursor-pointer text-left" 
+            tabIndex={0} 
+            aria-label="Settings"
+          >
+            <Settings className="h-5 w-5" />
+            Settings
+          </button>
+        )}
         <button 
           onClick={handleLogout}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-highlight/80 hover:bg-highlight/10 hover:text-highlight transition-all cursor-pointer text-left" 

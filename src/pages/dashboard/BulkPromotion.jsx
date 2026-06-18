@@ -140,12 +140,14 @@ const BulkPromotion = () => {
             (c) =>
               c.standard === nextStd &&
               c.division === student.division &&
-              c.medium === student.medium
+              c.medium === student.medium &&
+              c.academicYearId === targetYearId
           )
 
           updateStudent(student.id, {
             standard: nextStd,
             classId: nextClass?.id || student.classId, // fallback if class 4A doesn't exist
+            currentClassId: nextClass?.id || null,
             status: 'Active',
             academicYearId: targetYearId,
             schoolBrand: nextBrand.name
@@ -249,6 +251,13 @@ const BulkPromotion = () => {
                   const nextStd = getNextStandard(student.standard)
                   const brand = getSchoolBrand(student.standard)
                   const nextBrand = nextStd !== 'GRADUATE' ? getSchoolBrand(nextStd) : null
+                  const targetClassExists = nextStd === 'GRADUATE' || classes.some(
+                    (c) =>
+                      c.standard === nextStd &&
+                      c.division === student.division &&
+                      c.medium === student.medium &&
+                      c.academicYearId === targetYearId
+                  )
 
                   return (
                     <tr key={student.id} className="hover:bg-gray-50/30 font-medium">
@@ -280,6 +289,11 @@ const BulkPromotion = () => {
                           <div className="inline-flex flex-col items-center gap-0.5">
                             <span className="font-semibold text-primary">Standard {nextStd}</span>
                             <span className="text-[9px] text-textMuted">({nextBrand?.name})</span>
+                            {!targetClassExists && (
+                              <span className="mt-1 text-[10px] text-highlight font-bold leading-tight block">
+                                ⚠️ No {nextStd} {student.medium} {student.division} class found for {targetYearId}. Create it first.
+                              </span>
+                            )}
                           </div>
                         )}
                       </td>

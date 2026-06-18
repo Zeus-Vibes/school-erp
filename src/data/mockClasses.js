@@ -10,9 +10,9 @@ export const mockClasses = [
     maxCapacity: 30,
     classTeacherId: 'SBIS-TCH-2425-001',
     subjects: [
-      { name: 'English', syllabus: 'Alphabet tracing and phonics' },
-      { name: 'Mathematics', syllabus: 'Basic counting 1-50' },
-      { name: 'Rhymes', syllabus: 'Nursery rhymes collection' }
+      { name: 'English', assignedTeacherId: 'SBIS-TCH-2425-001', assignedTeacherName: 'Priya Mehta', syllabus: 'Alphabet tracing and phonics' },
+      { name: 'Mathematics', assignedTeacherId: 'SBIS-TCH-2425-001', assignedTeacherName: 'Priya Mehta', syllabus: 'Basic counting 1-50' },
+      { name: 'Rhymes', assignedTeacherId: '', assignedTeacherName: '', syllabus: 'Nursery rhymes collection' }
     ]
   },
   {
@@ -26,10 +26,10 @@ export const mockClasses = [
     maxCapacity: 40,
     classTeacherId: 'SBIS-TCH-2425-001',
     subjects: [
-      { name: 'English', syllabus: 'Grammar, Reading comprehension' },
-      { name: 'Mathematics', syllabus: 'Multiplication, Division, Fractions' },
-      { name: 'Science', syllabus: 'Plants, Animals, Human Body' },
-      { name: 'Social Studies', syllabus: 'Our Community, Maps' }
+      { name: 'English', assignedTeacherId: 'SBIS-TCH-2425-003', assignedTeacherName: 'Sunita Sharma', syllabus: 'Grammar, Reading comprehension' },
+      { name: 'Mathematics', assignedTeacherId: 'SBIS-TCH-2425-001', assignedTeacherName: 'Priya Mehta', syllabus: 'Multiplication, Division, Fractions' },
+      { name: 'Science', assignedTeacherId: 'SBIS-TCH-2425-001', assignedTeacherName: 'Priya Mehta', syllabus: 'Plants, Animals, Human Body' },
+      { name: 'Social Studies', assignedTeacherId: 'SBIS-TCH-2425-002', assignedTeacherName: 'Arjun Verma', syllabus: 'Our Community, Maps' }
     ]
   },
   {
@@ -43,10 +43,10 @@ export const mockClasses = [
     maxCapacity: 35,
     classTeacherId: 'SBIS-TCH-2425-002',
     subjects: [
-      { name: 'Gujarati', syllabus: 'Gujarati literature and grammar' },
-      { name: 'Mathematics', syllabus: 'Decimals, Geometry, Area' },
-      { name: 'Science', syllabus: 'Matter, Environment, Simple machines' },
-      { name: 'Social Studies', syllabus: 'History, Indian Geography' }
+      { name: 'Gujarati', assignedTeacherId: '', assignedTeacherName: '', syllabus: 'Gujarati literature and grammar' },
+      { name: 'Mathematics', assignedTeacherId: 'SBIS-TCH-2425-002', assignedTeacherName: 'Arjun Verma', syllabus: 'Decimals, Geometry, Area' },
+      { name: 'Science', assignedTeacherId: 'SBIS-TCH-2425-002', assignedTeacherName: 'Arjun Verma', syllabus: 'Matter, Environment, Simple machines' },
+      { name: 'Social Studies', assignedTeacherId: 'SBIS-TCH-2425-002', assignedTeacherName: 'Arjun Verma', syllabus: 'History, Indian Geography' }
     ]
   }
 ]

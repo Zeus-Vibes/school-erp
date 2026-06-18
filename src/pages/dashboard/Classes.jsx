@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Edit, Trash2, BookOpen, User, Layers, ShieldCheck } from 'lucide-react'
 import PageHeader from '../../components/ui/PageHeader'
 import DataTable from '../../components/ui/DataTable'
@@ -8,6 +8,9 @@ import Modal from '../../components/ui/Modal'
 import { useData } from '../../context/DataContext'
 import { getSchoolBrand } from '../../utils/schoolBrand'
 import toast from 'react-hot-toast'
+import ConfirmDialog from '../../components/shared/ConfirmDialog'
+import SchoolBrandBadge from '../../components/shared/SchoolBrandBadge'
+import EnrolledStudentsDrawer from '../../components/shared/EnrolledStudentsDrawer'
 
 const INITIAL_FORM_STATE = {
   academicYearId: '',
@@ -34,7 +37,8 @@ const Classes = () => {
     deleteClass, 
     teachers, 
     students, 
-    academicYears 
+    academicYears,
+    getEnrolledCount
   } = useData()
 
   // State management
@@ -42,6 +46,9 @@ const Classes = () => {
   const [modalMode, setModalMode] = useState('create') // 'create' | 'edit'
   const [editingId, setEditingId] = useState(null)
   const [formData, setFormData] = useState(INITIAL_FORM_STATE)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteTargetId, setDeleteTargetId] = useState(null)
+  const [selectedClass, setSelectedClass] = useState(null)
 
   // Get active teachers for assignment
   const activeTeachers = useMemo(() => teachers.filter(t => t.isActive !== false), [teachers])
@@ -97,10 +104,18 @@ const Classes = () => {
       return
     }
 
-    if (!window.confirm('Are you sure you want to delete this class?')) return
-    deleteClass(id)
-    toast.success('Class deleted successfully')
-  }, [deleteClass, classes, students])
+    setDeleteTargetId(id)
+    setShowDeleteConfirm(true)
+  }, [classes, students])
+
+  const handleConfirmDelete = useCallback(() => {
+    if (deleteTargetId) {
+      deleteClass(deleteTargetId)
+      toast.success('Class deleted successfully')
+    }
+    setShowDeleteConfirm(false)
+    setDeleteTargetId(null)
+  }, [deleteClass, deleteTargetId])
 
   // Subjects dynamic fields management
   const handleAddSubjectField = useCallback(() => {
@@ -187,12 +202,8 @@ const Classes = () => {
       id: 'brand',
       header: 'School Brand',
       cell: ({ row }) => {
-        const brand = getSchoolBrand(row.original.standard)
-        return (
-          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${brand.badgeClass}`}>
-            {brand.name}
-          </span>
-        )
+        const brandName = row.original.schoolBrand || getSchoolBrand(row.original.standard).name
+        return <SchoolBrandBadge brand={brandName} />
       },
     },
     {
@@ -212,11 +223,20 @@ const Classes = () => {
       id: 'studentsCount',
       header: 'Students',
       cell: ({ row }) => {
-        const count = students.filter(
-          s => s.classId === row.original.id || 
-          (s.standard === row.original.standard && s.medium === row.original.medium && s.division === row.original.division)
-        ).length
-        return <Badge label={`${count} Enrolled`} color={count > 0 ? 'green' : 'gray'} />
+        const count = getEnrolledCount(row.original.id)
+        return (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setSelectedClass(row.original)
+            }}
+            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold hover:bg-green-200 transition-colors border border-green-200 cursor-pointer"
+            tabIndex={0}
+            aria-label={`${count} Enrolled. Click to view.`}
+          >
+            {count} Enrolled
+          </button>
+        )
       },
     },
     {
@@ -235,7 +255,10 @@ const Classes = () => {
       cell: ({ row }) => (
         <div className="flex gap-1">
           <button
-            onClick={() => handleOpenEditModal(row.original)}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleOpenEditModal(row.original)
+            }}
             className="rounded-lg p-1.5 text-primary hover:bg-blue-50 cursor-pointer"
             tabIndex={0}
             aria-label={`Edit Class ${row.original.standard}-${row.original.division}`}
@@ -243,7 +266,10 @@ const Classes = () => {
             <Edit className="h-4 w-4" />
           </button>
           <button
-            onClick={() => handleDelete(row.original.id)}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleDelete(row.original.id)
+            }}
             className="rounded-lg p-1.5 text-highlight hover:bg-red-50 cursor-pointer"
             tabIndex={0}
             aria-label={`Delete Class ${row.original.standard}-${row.original.division}`}
@@ -253,7 +279,7 @@ const Classes = () => {
         </div>
       ),
     },
-  ], [teachers, students, handleOpenEditModal, handleDelete])
+  ], [teachers, students, getEnrolledCount, handleOpenEditModal, handleDelete])
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -274,7 +300,7 @@ const Classes = () => {
         }
       />
 
-      <DataTable data={classes} columns={columns} searchPlaceholder="Search classes..." />
+      <DataTable data={classes} columns={columns} searchPlaceholder="Search classes..." onRowClick={setSelectedClass} />
 
       {/* Add/Edit Class Modal */}
       <Modal 
@@ -443,18 +469,43 @@ const Classes = () => {
             ) : (
               <div className="space-y-3 max-h-[200px] overflow-y-auto pr-1">
                 {formData.subjects.map((sub, index) => (
-                  <div key={index} className="flex gap-3 items-start bg-gray-50/50 p-3 rounded-xl border border-border/50">
-                    <div className="flex-1">
+                  <div key={index} className="grid grid-cols-12 gap-3 items-start bg-gray-50/50 p-3 rounded-xl border border-border/50">
+                    {/* Subject Name — col 3 */}
+                    <div className="col-span-3">
                       <input
                         type="text"
-                        placeholder="Subject Name (e.g. Mathematics)"
+                        placeholder="Subject Name"
                         value={sub.name}
                         onChange={(e) => handleSubjectChange(index, 'name', e.target.value)}
                         required
                         className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
                       />
                     </div>
-                    <div className="flex-[2]">
+
+                    {/* Assigned Teacher — col 4 */}
+                    <div className="col-span-4">
+                      <select
+                        value={sub.assignedTeacherId || ''}
+                        onChange={(e) => {
+                          const tId = e.target.value
+                          const teacherObj = activeTeachers.find(t => t.id === tId || t.userId === tId)
+                          const tName = teacherObj ? teacherObj.name : ''
+                          handleSubjectChange(index, 'assignedTeacherId', tId)
+                          handleSubjectChange(index, 'assignedTeacherName', tName)
+                        }}
+                        className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                      >
+                        <option value="">— Assign Teacher (optional) —</option>
+                        {activeTeachers.map(t => (
+                          <option key={t.id} value={t.id}>
+                            {t.name || t.fullName} ({t.subjects?.join(', ') || ''})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Syllabus — col 4 */}
+                    <div className="col-span-4">
                       <textarea
                         placeholder="Syllabus overview (optional)"
                         value={sub.syllabus || ''}
@@ -463,14 +514,18 @@ const Classes = () => {
                         className="w-full rounded-lg border border-border bg-white px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary resize-none"
                       />
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSubjectField(index)}
-                      className="rounded-lg p-1.5 text-highlight hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer self-center"
-                      aria-label="Remove subject"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+
+                    {/* Remove — col 1 */}
+                    <div className="col-span-1 flex justify-center pt-1.5">
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveSubjectField(index)}
+                        className="rounded-lg p-1 text-highlight hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer"
+                        aria-label="Remove subject"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -496,6 +551,31 @@ const Classes = () => {
           </div>
         </form>
       </Modal>
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="Delete Class"
+        message="Are you sure you want to delete this class? This will permanently remove the class configuration."
+        confirmLabel="Delete"
+        isDanger={true}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setShowDeleteConfirm(false)
+          setDeleteTargetId(null)
+        }}
+      />
+      <AnimatePresence>
+        {selectedClass && (
+          <EnrolledStudentsDrawer
+            cls={selectedClass}
+            students={students.filter(s =>
+              s.currentClassId === selectedClass.id || s.classId === selectedClass.id
+            )}
+            onClose={() => setSelectedClass(null)}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }

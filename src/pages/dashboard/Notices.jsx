@@ -8,6 +8,7 @@ import { useData } from '../../context/DataContext'
 import { useAuth } from '../../context/AuthContext'
 import { formatDate } from '../../utils/helpers'
 import toast from 'react-hot-toast'
+import ConfirmDialog from '../../components/shared/ConfirmDialog'
 
 const categories = ['All', 'Event', 'Finance', 'Holiday', 'Meeting', 'Academic']
 
@@ -28,6 +29,8 @@ const Notices = () => {
   const [expandedId, setExpandedId] = useState(null)
   const [showAddModal, setShowAddModal] = useState(false)
   const [search, setSearch] = useState('')
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteTargetId, setDeleteTargetId] = useState(null)
 
   // Form State
   const [title, setTitle] = useState('')
@@ -114,10 +117,17 @@ const Notices = () => {
   }
 
   const handleDelete = (id) => {
-    if (window.confirm('Delete this notice?')) {
-      deleteNotice(id)
+    setDeleteTargetId(id)
+    setShowDeleteConfirm(true)
+  }
+
+  const handleConfirmDelete = () => {
+    if (deleteTargetId) {
+      deleteNotice(deleteTargetId)
       toast.success('Notice deleted permanently')
     }
+    setShowDeleteConfirm(false)
+    setDeleteTargetId(null)
   }
 
   const handleReactivate = (notice) => {
@@ -432,6 +442,20 @@ const Notices = () => {
           </div>
         </form>
       </Modal>
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="Delete Notice"
+        message="Are you sure you want to delete this notice permanently? This action cannot be undone."
+        confirmLabel="Delete"
+        isDanger={true}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setShowDeleteConfirm(false)
+          setDeleteTargetId(null)
+        }}
+      />
     </motion.div>
   )
 }

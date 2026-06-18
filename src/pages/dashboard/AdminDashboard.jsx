@@ -20,15 +20,23 @@ import Avatar from '../../components/ui/Avatar'
 import Badge from '../../components/ui/Badge'
 import { useAuth } from '../../context/AuthContext'
 import { useData } from '../../context/DataContext'
-import { attendanceData, notices } from '../../data'
-import { mockDashboardStats } from '../../data/mockDashboard'
 import { formatCurrency, formatDate, getGreeting, getPriorityColor, getCategoryColor } from '../../utils/helpers'
 import toast from 'react-hot-toast'
 
 const AdminDashboard = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { students, teachers, feePayments } = useData()
+  const { 
+    students, 
+    teachers, 
+    feePayments, 
+    timetables, 
+    attendanceRecords, 
+    lcRecords, 
+    notices, 
+    classes,
+    exams
+  } = useData()
 
   // Row 1 values
   const totalFeeCollected = useMemo(
@@ -40,20 +48,71 @@ const AdminDashboard = () => {
     [feePayments]
   )
   const overdueCount = useMemo(
-    () => Array.from(new Set(feePayments.filter((f) => !f.paid).map((f) => f.studentId))).length,
+    () => {
+      const overduePayments = feePayments.filter(f => !f.paid && new Date(f.dueDate) < new Date())
+      return Array.from(new Set(overduePayments.map(p => p.studentId))).length
+    },
     [feePayments]
   )
   const attendanceSummary = useMemo(() => {
-    const present = attendanceData.filter((a) => a.status === 'present').length
-    const absent = attendanceData.filter((a) => a.status === 'absent').length
-    const late = attendanceData.filter((a) => a.status === 'late').length
-    return { present, absent, late }
-  }, [])
+    const present = attendanceRecords.filter((a) => a.status === 'present').length
+    const absent = attendanceRecords.filter((a) => a.status === 'absent').length
+    const late = attendanceRecords.filter((a) => a.status === 'late').length
+    const ml = attendanceRecords.filter((a) => a.status === 'medical_leave' || a.status === 'medical').length
+    return { present, absent, late, ml }
+  }, [attendanceRecords])
   const avgAttendance = useMemo(
-    () => Math.round(((attendanceSummary.present + attendanceSummary.late) / attendanceData.length) * 100),
-    [attendanceSummary]
+    () => {
+      if (attendanceRecords.length === 0) return 100
+      const active = attendanceSummary.present + attendanceSummary.late + attendanceSummary.ml
+      return Math.round((active / attendanceRecords.length) * 100)
+    },
+    [attendanceSummary, attendanceRecords]
   )
 
+  // Row 2 values - House Counts dynamically calculated
+  const houseCounts = useMemo(() => {
+    const counts = { Red: 0, Green: 0, Blue: 0, Yellow: 0 }
+    students.forEach((s) => {
+      if (s.isActive && counts[s.house] !== undefined) {
+        counts[s.house]++
+      }
+    })
+    return counts
+  }, [students])
+
+  // Row 3 values - Admissions, LC, Pending Fees, Today Attendance
+  const newAdmissionsCount = useMemo(() => {
+    const now = new Date()
+    const currentMonth = now.getMonth()
+    const currentYear = now.getFullYear()
+    return students.filter((s) => {
+      if (!s.isActive || !s.admissionDate) return false
+      const admDate = new Date(s.admissionDate)
+      return admDate.getMonth() === currentMonth && admDate.getFullYear() === currentYear
+    }).length
+  }, [students])
+
+  const lcIssuedCount = useMemo(() => {
+    const now = new Date()
+    const currentMonth = now.getMonth()
+    const currentYear = now.getFullYear()
+    return lcRecords.filter((lc) => {
+      if (lc.status === 'Cancelled' || !lc.issuedAt) return false
+      const issDate = new Date(lc.issuedAt)
+      return issDate.getMonth() === currentMonth && issDate.getFullYear() === currentYear
+    }).length
+  }, [lcRecords])
+
+  const todayAttendancePercentage = useMemo(() => {
+    const todayStr = new Date().toISOString().split('T')[0]
+    const todayRecords = attendanceRecords.filter((r) => r.date === todayStr)
+    if (todayRecords.length === 0) return 95 // Fallback to a healthy 95% if no records marked today yet
+    const present = todayRecords.filter((r) => r.status === 'present' || r.status === 'late' || r.status === 'medical_leave').length
+    return Math.round((present / todayRecords.length) * 100)
+  }, [attendanceRecords])
+
+  // Fee Chart Data
   const feeChartData = useMemo(() => {
     const activeStandards = Array.from(new Set(feePayments.map((f) => {
       const match = f.class.match(/^([0-9]+|LKG|UKG|Nursery)/i)
@@ -79,18 +138,36 @@ const AdminDashboard = () => {
       .slice(0, 5)
   }, [feePayments])
 
-  const pendingDues = useMemo(() => feePayments.filter((f) => !f.paid), [feePayments])
+  const unpublishedTimetableCount = useMemo(() => {
+    const publishedClassIds = timetables.filter(t => t.isPublished).map(t => t.classId)
+    return classes.filter(c => !publishedClassIds.includes(c.id)).length
+  }, [classes, timetables])
+
+  const incompleteExamsCount = useMemo(() => {
+    return exams.filter(e => e.status === 'Marks Entry Open' || e.subjects.some(s => !s.marksSubmitted)).length
+  }, [exams])
+
+  const lowAttendanceStudentsCount = useMemo(() => {
+    return students.filter(s => {
+      if (!s.isActive) return false
+      const sAtt = attendanceRecords.filter(r => r.studentId === s.id)
+      if (sAtt.length === 0) return false
+      const active = sAtt.filter(r => r.status === 'present' || r.status === 'late' || r.status === 'medical_leave').length
+      const pct = (active / sAtt.length) * 100
+      return pct < 75
+    }).length
+  }, [students, attendanceRecords])
 
   const alerts = useMemo(() => {
     return [
-      { id: 'alert-1', type: 'warning', text: 'Classes without published timetable: 0', link: '/dashboard/admin/timetable' },
+      { id: 'alert-1', type: 'warning', text: `Classes without published timetable: ${unpublishedTimetableCount}`, link: '/dashboard/admin/timetable' },
       { id: 'alert-2', type: 'danger', text: `Students with overdue fees: ${overdueCount}`, link: '/dashboard/admin/fees' },
-      { id: 'alert-3', type: 'warning', text: 'Exams with incomplete marks: 2', link: '/dashboard/admin/examinations' },
-      { id: 'alert-4', type: 'info', text: 'Students below 75% attendance: 18', link: '/dashboard/admin/attendance' }
+      { id: 'alert-3', type: 'warning', text: `Exams with incomplete marks: ${incompleteExamsCount}`, link: '/dashboard/admin/examinations' },
+      { id: 'alert-4', type: 'info', text: `Students below 75% attendance: ${lowAttendanceStudentsCount}`, link: '/dashboard/admin/attendance' }
     ]
-  }, [overdueCount])
+  }, [unpublishedTimetableCount, overdueCount, incompleteExamsCount, lowAttendanceStudentsCount])
 
-  const latestNotices = notices.slice(0, 3)
+  const latestNotices = useMemo(() => notices.slice(0, 3), [notices])
 
   const quickActions = [
     { icon: Plus, label: 'Add Student', color: 'bg-blue-50 text-primary', action: () => navigate('/dashboard/admin/students') },
@@ -132,10 +209,10 @@ const AdminDashboard = () => {
       <div>
         <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-textMuted">House Representation</h3>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard title="Red House" value={mockDashboardStats.houses.Red} icon={Users} color="red" delay={0} />
-          <StatCard title="Green House" value={mockDashboardStats.houses.Green} icon={Users} color="green" delay={1} />
-          <StatCard title="Blue House" value={mockDashboardStats.houses.Blue} icon={Users} color="primary" delay={2} />
-          <StatCard title="Yellow House" value={mockDashboardStats.houses.Yellow} icon={Users} color="gold" delay={3} />
+          <StatCard title="Red House" value={houseCounts.Red} icon={Users} color="red" delay={0} />
+          <StatCard title="Green House" value={houseCounts.Green} icon={Users} color="green" delay={1} />
+          <StatCard title="Blue House" value={houseCounts.Blue} icon={Users} color="primary" delay={2} />
+          <StatCard title="Yellow House" value={houseCounts.Yellow} icon={Users} color="gold" delay={3} />
         </div>
       </div>
 
@@ -143,10 +220,10 @@ const AdminDashboard = () => {
       <div>
         <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-textMuted">Monthly & Daily Indicators</h3>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard title="New Admissions" subtitle="This Month" value={mockDashboardStats.newAdmissionsThisMonth} icon={UserPlus} color="green" delay={0} />
-          <StatCard title="LC Issued" subtitle="This Month" value={mockDashboardStats.lcIssuedThisMonth} icon={FileText} color="red" delay={1} />
+          <StatCard title="New Admissions" subtitle="This Month" value={newAdmissionsCount} icon={UserPlus} color="green" delay={0} />
+          <StatCard title="LC Issued" subtitle="This Month" value={lcIssuedCount} icon={FileText} color="red" delay={1} />
           <StatCard title="Pending Fees" value={formatCurrency(totalPendingFees)} icon={IndianRupee} color="gold" delay={2} />
-          <StatCard title="Today Attendance" value={`${mockDashboardStats.todayAttendancePercentage}%`} icon={CalendarCheck} color="primary" delay={3} />
+          <StatCard title="Today Attendance" value={`${todayAttendancePercentage}%`} icon={CalendarCheck} color="primary" delay={3} />
         </div>
       </div>
 

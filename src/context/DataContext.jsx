@@ -577,6 +577,14 @@ export const DataProvider = ({ children }) => {
     })
   }, [])
 
+  const getEnrolledCount = useCallback((classId) => {
+    return students.filter(s =>
+      (s.currentClassId === classId || s.classId === classId) &&
+      s.isActive !== false &&
+      (!s.status || s.status === 'Active')
+    ).length
+  }, [students])
+
   const value = {
     academicYears,
     classes,
@@ -593,6 +601,7 @@ export const DataProvider = ({ children }) => {
     notices,
     lcRecords,
     settings,
+    getEnrolledCount,
     
     // CRUD methods
     addAcademicYear,

@@ -11,6 +11,7 @@ import { useData } from '../../context/DataContext'
 import { getSchoolBrand } from '../../utils/schoolBrand'
 import { formatDate } from '../../utils/helpers'
 import toast from 'react-hot-toast'
+import ConfirmDialog from '../../components/shared/ConfirmDialog'
 
 const INITIAL_FORM_STATE = {
   // Personal Info
@@ -95,6 +96,8 @@ const Students = () => {
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [formData, setFormData] = useState(INITIAL_FORM_STATE)
   const [copiedField, setCopiedField] = useState(null) // 'user' | 'pass'
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteTargetId, setDeleteTargetId] = useState(null)
   const [savedCredentials, setSavedCredentials] = useState(null) // { userId, password }
 
   const activeYear = useMemo(() => academicYears.find(y => y.isActive) || academicYears[0], [academicYears])
@@ -182,10 +185,18 @@ const Students = () => {
 
   // Delete Handler
   const handleDelete = useCallback((id) => {
-    if (!window.confirm('Are you sure you want to delete this student record?')) return
-    deleteStudent(id)
-    toast.success('Student record deleted successfully')
-  }, [deleteStudent])
+    setDeleteTargetId(id)
+    setShowDeleteConfirm(true)
+  }, [])
+
+  const handleConfirmDelete = useCallback(() => {
+    if (deleteTargetId) {
+      deleteStudent(deleteTargetId)
+      toast.success('Student record deleted successfully')
+    }
+    setShowDeleteConfirm(false)
+    setDeleteTargetId(null)
+  }, [deleteStudent, deleteTargetId])
 
   // Open Modal for Create
   const handleOpenAddModal = useCallback(() => {
@@ -1187,6 +1198,20 @@ const Students = () => {
           </div>
         )}
       </Modal>
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="Delete Student Record"
+        message="Are you sure you want to delete this student record permanently? This will remove all academic history, fee records, and portal login."
+        confirmLabel="Delete"
+        isDanger={true}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setShowDeleteConfirm(false)
+          setDeleteTargetId(null)
+        }}
+      />
     </motion.div>
   )
 }

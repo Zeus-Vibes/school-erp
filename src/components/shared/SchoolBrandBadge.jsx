@@ -1,13 +1,16 @@
-import { getSchoolBrand } from '../../utils/schoolBrand'
-
-const SchoolBrandBadge = ({ standard }) => {
-  const brand = getSchoolBrand(standard)
+const SchoolBrandBadge = ({ brand }) => {
+  const isShivDhara = brand === 'Shiv Dhara School'
   return (
-    <span 
-      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide ${brand.badgeClass}`}
-      aria-label={`School Brand: ${brand.name}`}
+    <span
+      className={`
+        inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium whitespace-nowrap
+        ${isShivDhara
+          ? 'bg-blue-100 text-blue-700 border border-blue-200'
+          : 'bg-green-100 text-green-700 border border-green-200'
+        }
+      `}
     >
-      {brand.name}
+      {isShivDhara ? 'Shiv Dhara' : 'Shree Bala'}
     </span>
   )
 }

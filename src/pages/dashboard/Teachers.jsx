@@ -10,6 +10,7 @@ import { useData } from '../../context/DataContext'
 import { formatDate, formatCurrency } from '../../utils/helpers'
 import { getSchoolBrand } from '../../utils/schoolBrand'
 import toast from 'react-hot-toast'
+import ConfirmDialog from '../../components/shared/ConfirmDialog'
 
 const INITIAL_FORM_STATE = {
   // Personal Info
@@ -59,6 +60,8 @@ const Teachers = () => {
   const [subjectInput, setSubjectInput] = useState('')
   const [copiedField, setCopiedField] = useState(null) // 'user' | 'pass'
   const [savedCredentials, setSavedCredentials] = useState(null) // { userId, password }
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteTargetId, setDeleteTargetId] = useState(null)
 
   const activeYear = useMemo(() => academicYears.find(y => y.isActive) || academicYears[0], [academicYears])
 
@@ -178,10 +181,18 @@ const Teachers = () => {
 
   // Delete Action
   const handleDelete = useCallback((id) => {
-    if (!window.confirm('Are you sure you want to delete this teacher permanently?')) return
-    deleteTeacher(id)
-    toast.success('Teacher deleted successfully')
-  }, [deleteTeacher])
+    setDeleteTargetId(id)
+    setShowDeleteConfirm(true)
+  }, [])
+
+  const handleConfirmDelete = useCallback(() => {
+    if (deleteTargetId) {
+      deleteTeacher(deleteTargetId)
+      toast.success('Teacher deleted successfully')
+    }
+    setShowDeleteConfirm(false)
+    setDeleteTargetId(null)
+  }, [deleteTeacher, deleteTargetId])
 
   // Deactivate / Activate Toggle Action
   const handleToggleStatus = useCallback((teacher) => {
@@ -1021,6 +1032,20 @@ const Teachers = () => {
           </div>
         )}
       </Modal>
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="Delete Teacher"
+        message="Are you sure you want to delete this teacher permanently? All subject and class mappings will be removed."
+        confirmLabel="Delete"
+        isDanger={true}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setShowDeleteConfirm(false)
+          setDeleteTargetId(null)
+        }}
+      />
     </motion.div>
   )
 }

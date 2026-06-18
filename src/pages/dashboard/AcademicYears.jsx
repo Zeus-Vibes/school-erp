@@ -8,6 +8,7 @@ import Modal from '../../components/ui/Modal'
 import { useData } from '../../context/DataContext'
 import { formatDate } from '../../utils/helpers'
 import toast from 'react-hot-toast'
+import ConfirmDialog from '../../components/shared/ConfirmDialog'
 
 const INITIAL_FORM_STATE = {
   label: '',
@@ -27,6 +28,8 @@ const AcademicYears = () => {
 
   const [showAddModal, setShowAddModal] = useState(false)
   const [formData, setFormData] = useState(INITIAL_FORM_STATE)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteTargetId, setDeleteTargetId] = useState(null)
 
   // Handle active status toggle
   const handleSetActive = useCallback((id) => {
@@ -46,10 +49,18 @@ const AcademicYears = () => {
       return
     }
 
-    if (!window.confirm('Are you sure you want to delete this academic year?')) return
-    deleteAcademicYear(id)
-    toast.success('Academic Year deleted successfully.')
-  }, [deleteAcademicYear, classes, students])
+    setDeleteTargetId(id)
+    setShowDeleteConfirm(true)
+  }, [classes, students])
+
+  const handleConfirmDelete = useCallback(() => {
+    if (deleteTargetId) {
+      deleteAcademicYear(deleteTargetId)
+      toast.success('Academic Year deleted successfully.')
+    }
+    setShowDeleteConfirm(false)
+    setDeleteTargetId(null)
+  }, [deleteAcademicYear, deleteTargetId])
 
   // Handle form submission
   const handleAdd = useCallback((event) => {
@@ -224,6 +235,20 @@ const AcademicYears = () => {
           </div>
         </form>
       </Modal>
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="Delete Academic Year"
+        message="Are you sure you want to delete this academic year? This will permanently remove the record."
+        confirmLabel="Delete"
+        isDanger={true}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setShowDeleteConfirm(false)
+          setDeleteTargetId(null)
+        }}
+      />
     </motion.div>
   )
 }

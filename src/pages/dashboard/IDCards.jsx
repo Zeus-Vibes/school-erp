@@ -285,9 +285,6 @@ const IDCards = () => {
   // 1. Tabs state: 'student' | 'faculty' | 'escort'
   const [activeTab, setActiveTab] = useState(isStudent ? 'student' : 'student')
 
-  // 2. Student ID Medium toggle state
-  const [isEnglishMedium, setIsEnglishMedium] = useState(true)
-
   // 3. Admin filters
   const [selectedClassId, setSelectedClassId] = useState(students[0]?.classId || '')
   const [selectedStudentId, setSelectedStudentId] = useState(students[0]?.id || '')
@@ -338,6 +335,9 @@ const IDCards = () => {
     }
     return students.find((s) => s.id === selectedStudentId)
   }, [students, selectedStudentId, isStudent, studentForCard])
+
+  // Derive theme color from student's actual medium
+  const isEnglishMedium = currentStudent ? currentStudent.medium === 'English' : true
 
   // Selected Teacher Object
   const currentTeacher = useMemo(() => {
@@ -457,25 +457,13 @@ const IDCards = () => {
           <div className="rounded-2xl border border-border bg-card p-6 shadow-card space-y-4">
             <h3 className="text-sm font-bold text-textPrimary uppercase tracking-wider">Card Controls</h3>
 
-            {/* Student ID sub-toggle */}
-            {activeTab === 'student' && (
+            {/* Student ID Medium Display */}
+            {activeTab === 'student' && currentStudent && (
               <div>
-                <label className="mb-2 block text-xs font-semibold text-textMuted uppercase">Language (Theme Color)</label>
-                <div className="flex gap-2 bg-gray-100 p-1 rounded-xl">
-                  <button
-                    type="button"
-                    onClick={() => setIsEnglishMedium(true)}
-                    className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all ${isEnglishMedium ? 'bg-white text-primary shadow-sm' : 'text-textMuted hover:text-textPrimary'}`}
-                  >
-                    English (Blue)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsEnglishMedium(false)}
-                    className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all ${!isEnglishMedium ? 'bg-white text-highlight shadow-sm' : 'text-textMuted hover:text-textPrimary'}`}
-                  >
-                    Gujarati (Red)
-                  </button>
+                <label className="mb-2 block text-xs font-semibold text-textMuted uppercase">Medium (Theme Color)</label>
+                <div className={`rounded-xl border p-3 flex justify-between items-center text-xs font-bold ${isEnglishMedium ? 'border-[#1A5276]/20 bg-[#1A5276]/5 text-[#1A5276]' : 'border-[#922B21]/20 bg-[#922B21]/5 text-[#922B21]'}`}>
+                  <span>{currentStudent.medium} Medium</span>
+                  <span>{isEnglishMedium ? 'Blue (#1A5276)' : 'Red (#922B21)'}</span>
                 </div>
               </div>
             )}
@@ -598,7 +586,7 @@ const IDCards = () => {
               {activeTab === 'student' && currentStudent && (
                 <StudentIDCard
                   student={currentStudent}
-                  isEnglishMedium={isStudent ? (currentStudent.medium === 'English') : isEnglishMedium}
+                  isEnglishMedium={isEnglishMedium}
                   settings={settings}
                 />
               )}

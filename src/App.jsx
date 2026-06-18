@@ -27,10 +27,9 @@ import LCGenerator from './pages/dashboard/LCGenerator'
 import BulkPromotion from './pages/dashboard/BulkPromotion'
 import Calendar from './pages/dashboard/Calendar'
 import Settings from './pages/dashboard/Settings'
-import {
-  ClassesPagePlaceholder,
-  ProfilePagePlaceholder
-} from './pages/dashboard/Placeholders'
+import TeacherClasses from './pages/teacher/TeacherClasses'
+import TeacherProfile from './pages/teacher/TeacherProfile'
+import StudentProfile from './pages/student/StudentProfile'
 
 const App = () => (
   <AuthProvider>
@@ -90,13 +89,13 @@ const App = () => (
         >
           <Route index element={<TeacherDashboard />} />
           <Route path="timetable" element={<Timetable />} />
-          <Route path="classes" element={<ClassesPagePlaceholder />} />
+          <Route path="classes" element={<TeacherClasses />} />
           <Route path="students" element={<Students />} />
           <Route path="attendance" element={<Attendance />} />
           <Route path="marks" element={<MarksEntry />} />
           <Route path="notices" element={<Notices />} />
           <Route path="calendar" element={<Calendar />} />
-          <Route path="profile" element={<ProfilePagePlaceholder />} />
+          <Route path="profile" element={<TeacherProfile />} />
         </Route>
 
         {/* Student Portal Group */}
@@ -116,7 +115,7 @@ const App = () => (
           <Route path="id-card" element={<IDCards />} />
           <Route path="notices" element={<Notices />} />
           <Route path="calendar" element={<Calendar />} />
-          <Route path="profile" element={<ProfilePagePlaceholder />} />
+          <Route path="profile" element={<StudentProfile />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

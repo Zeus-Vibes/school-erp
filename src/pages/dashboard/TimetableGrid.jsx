@@ -125,7 +125,7 @@ const TimetableGrid = () => {
     })
 
     if (otherConflict) {
-      const otherClass = classes.find((c) => c.id === otherTt.classId)
+      const otherClass = classes.find((c) => c.id === otherConflict.classId)
       const classLabel = otherClass ? `${otherClass.standard}${otherClass.division}` : 'another class'
       toast(`⚠️ ${teacher?.name || 'Teacher'} is already in Class ${classLabel} at this slot. You can still proceed.`, {
         icon: '⚠️',

@@ -13,7 +13,7 @@ import SearchBar from './SearchBar'
 import EmptyState from './EmptyState'
 import { FileX2 } from 'lucide-react'
 
-const DataTable = ({ data, columns, searchable = true, searchPlaceholder = 'Search...', filters, pageSize = 10 }) => {
+const DataTable = ({ data, columns, searchable = true, searchPlaceholder = 'Search...', filters, pageSize = 10, onRowClick }) => {
   const [sorting, setSorting] = useState([])
   const [globalFilter, setGlobalFilter] = useState('')
 
@@ -84,8 +84,17 @@ const DataTable = ({ data, columns, searchable = true, searchPlaceholder = 'Sear
             {table.getRowModel().rows.map((row, index) => (
               <tr
                 key={row.id}
+                onClick={() => onRowClick && onRowClick(row.original)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && onRowClick) {
+                    onRowClick(row.original)
+                  }
+                }}
+                tabIndex={onRowClick ? 0 : undefined}
+                role={onRowClick ? 'button' : undefined}
                 className={clsx(
-                  'border-b border-border/50 transition-colors hover:bg-blue-50/50',
+                  'border-b border-border/50 transition-colors hover:bg-blue-50/50 focus:outline-none focus:bg-blue-50/50',
+                  onRowClick && 'cursor-pointer',
                   index % 2 === 0 ? 'bg-white' : 'bg-bg/30'
                 )}
               >
